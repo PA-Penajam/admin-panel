@@ -13,17 +13,20 @@
 - [mediasi/sk/tambah/page.tsx](file://app/mediasi/sk/tambah/page.tsx)
 - [mediasi/banners/tambah/page.tsx](file://app/mediasi/banners/tambah/page.tsx)
 - [mediasi/sk/[id]/edit/page.tsx](file://app/mediasi/sk/[id]/edit/page.tsx)
+- [sk-inovasi/page.tsx](file://app/sk-inovasi/page.tsx)
+- [sk-inovasi/tambah/page.tsx](file://app/sk-inovasi/tambah/page.tsx)
+- [sk-inovasi/[id]/edit/page.tsx](file://app/sk-inovasi/[id]/edit/page.tsx)
 - [utils.ts](file://lib/utils.ts)
 - [package.json](file://package.json)
 </cite>
 
 ## Update Summary
 **Changes Made**
-- Added new Mediasi endpoints for SK management and banner management
-- Updated API client with MediasiSk and MediatorBanner data models
-- Enhanced file upload handling for Mediasi operations
-- Added comprehensive Mediasi CRUD operations documentation
-- Updated endpoint specifications and practical usage examples
+- Added comprehensive SK Inovasi API functions including getAllSkInovasi(), getSkInovasi(), createSkInovasi(), updateSkInovasi(), and deleteSkInovasi() with support for both JSON and FormData responses
+- Integrated SK Inovasi data model with file upload scenarios and enhanced error handling
+- Implemented complete UI components for SK Inovasi management including list, add, and edit functionality
+- Enhanced file upload handling with support for both URL-based content and direct file uploads
+- Updated endpoint specifications and practical usage examples for SK Inovasi operations
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -42,7 +45,7 @@ This document describes the centralized RESTful API client and integration patte
 - Centralized API client architecture and HTTP methods
 - URL patterns and request/response handling
 - Authentication and response normalization
-- CRUD endpoints for multiple resources including new Mediasi management
+- CRUD endpoints for multiple resources including new SK Inovasi management
 - Data models and parameter validation
 - Toast notification system for user feedback and error display
 - Loading states and pagination patterns
@@ -51,7 +54,7 @@ This document describes the centralized RESTful API client and integration patte
 - Troubleshooting and debugging techniques
 
 ## Project Structure
-The API integration is implemented in a single centralized module that exposes typed functions for each resource. Pages consume these functions and integrate with a toast notification system for user feedback. The system now includes comprehensive Mediasi management capabilities for SK (Surat Keputusan) and banner management.
+The API integration is implemented in a single centralized module that exposes typed functions for each resource. Pages consume these functions and integrate with a toast notification system for user feedback. The system now includes comprehensive SK Inovasi management capabilities alongside existing Mediasi management functionality.
 
 ```mermaid
 graph TB
@@ -63,6 +66,9 @@ M1["app/mediasi/page.tsx"]
 M2["app/mediasi/sk/tambah/page.tsx"]
 M3["app/mediasi/banners/tambah/page.tsx"]
 M4["app/mediasi/sk/[id]/edit/page.tsx"]
+SI1["app/sk-inovasi/page.tsx"]
+SI2["app/sk-inovasi/tambah/page.tsx"]
+SI3["app/sk-inovasi/[id]/edit/page.tsx"]
 end
 subgraph "UI"
 L["app/layout.tsx"]
@@ -80,6 +86,9 @@ M1 --> API
 M2 --> API
 M3 --> API
 M4 --> API
+SI1 --> API
+SI2 --> API
+SI3 --> API
 L --> TComp
 TComp --> UToast
 P1 --> UToast
@@ -89,6 +98,9 @@ M1 --> UToast
 M2 --> UToast
 M3 --> UToast
 M4 --> UToast
+SI1 --> UToast
+SI2 --> UToast
+SI3 --> UToast
 P1 --> Utils
 P2 --> Utils
 P3 --> Utils
@@ -96,10 +108,13 @@ M1 --> Utils
 M2 --> Utils
 M3 --> Utils
 M4 --> Utils
+SI1 --> Utils
+SI2 --> Utils
+SI3 --> Utils
 ```
 
 **Diagram sources**
-- [api.ts:1-1233](file://lib/api.ts#L1-L1233)
+- [api.ts:1-1386](file://lib/api.ts#L1-L1386)
 - [use-toast.ts:1-195](file://hooks/use-toast.ts#L1-L195)
 - [toast.tsx:1-130](file://components/ui/toast.tsx#L1-L130)
 - [layout.tsx:1-37](file://app/layout.tsx#L1-L37)
@@ -110,10 +125,13 @@ M4 --> Utils
 - [mediasi/sk/tambah/page.tsx:1-112](file://app/mediasi/sk/tambah/page.tsx#L1-L112)
 - [mediasi/banners/tambah/page.tsx:1-112](file://app/mediasi/banners/tambah/page.tsx#L1-L112)
 - [mediasi/sk/[id]/edit/page.tsx:1-151](file://app/mediasi/sk/[id]/edit/page.tsx#L1-L151)
+- [sk-inovasi/page.tsx:1-214](file://app/sk-inovasi/page.tsx#L1-L214)
+- [sk-inovasi/tambah/page.tsx:1-191](file://app/sk-inovasi/tambah/page.tsx#L1-L191)
+- [sk-inovasi/[id]/edit/page.tsx:1-227](file://app/sk-inovasi/[id]/edit/page.tsx#L1-L227)
 - [utils.ts:1-26](file://lib/utils.ts#L1-L26)
 
 **Section sources**
-- [api.ts:1-1233](file://lib/api.ts#L1-L1233)
+- [api.ts:1-1386](file://lib/api.ts#L1-L1386)
 - [use-toast.ts:1-195](file://hooks/use-toast.ts#L1-L195)
 - [toast.tsx:1-130](file://components/ui/toast.tsx#L1-L130)
 - [layout.tsx:1-37](file://app/layout.tsx#L1-L37)
@@ -124,10 +142,13 @@ M4 --> Utils
 - [mediasi/sk/tambah/page.tsx:1-112](file://app/mediasi/sk/tambah/page.tsx#L1-L112)
 - [mediasi/banners/tambah/page.tsx:1-112](file://app/mediasi/banners/tambah/page.tsx#L1-L112)
 - [mediasi/sk/[id]/edit/page.tsx:1-151](file://app/mediasi/sk/[id]/edit/page.tsx#L1-L151)
+- [sk-inovasi/page.tsx:1-214](file://app/sk-inovasi/page.tsx#L1-L214)
+- [sk-inovasi/tambah/page.tsx:1-191](file://app/sk-inovasi/tambah/page.tsx#L1-L191)
+- [sk-inovasi/[id]/edit/page.tsx:1-227](file://app/sk-inovasi/[id]/edit/page.tsx#L1-L227)
 - [utils.ts:1-26](file://lib/utils.ts#L1-L26)
 
 ## Core Components
-- Centralized API client: Provides typed functions for CRUD operations against multiple resources including new Mediasi management endpoints. It normalizes diverse server response formats into a unified shape and adds an API key header.
+- Centralized API client: Provides typed functions for CRUD operations against multiple resources including new SK Inovasi management endpoints. It normalizes diverse server response formats into a unified shape and adds an API key header.
 - Toast notification system: Provides a lightweight, Radix-based toast system with a hook for imperative notifications and a provider in the root layout.
 - Page components: Consume the API client, manage loading states, pagination, and user actions, and surface feedback via the toast system.
 
@@ -198,7 +219,7 @@ end
 - File upload handling:
   - Several endpoints accept FormData; the client sets appropriate headers and uses POST with _method=PUT for updates.
 
-**Updated** Added comprehensive Mediasi management endpoints with proper file upload handling for SK documents and banner images.
+**Updated** Added comprehensive SK Inovasi management endpoints with proper file upload handling for PDF documents and URL-based content.
 
 Endpoints and patterns by resource:
 - Panggilan Ghaib: getAllPanggilan, getPanggilan, createPanggilan, updatePanggilan, deletePanggilan
@@ -218,6 +239,7 @@ Endpoints and patterns by resource:
 - LRA: getAllLra, getLra, createLra, updateLra, deleteLra
 - **Mediasi SK Management**: getAllMediasiSk, createMediasiSk, updateMediasiSk, deleteMediasiSk
 - **Mediator Banner Management**: getAllMediatorBanners, createMediatorBanner, updateMediatorBanner, deleteMediatorBanner
+- **SK Inovasi Management**: getAllSkInovasi, getSkInovasi, createSkInovasi, updateSkInovasi, deleteSkInovasi
 
 Response normalization and error handling:
 - normalizeApiResponse adapts server responses to a consistent shape.
@@ -230,7 +252,7 @@ Authentication:
 - All requests include X-API-Key header populated from NEXT_PUBLIC_API_KEY.
 
 **Section sources**
-- [api.ts:1-1233](file://lib/api.ts#L1-L1233)
+- [api.ts:1-1386](file://lib/api.ts#L1-L1386)
 
 ### Data Models and Parameter Validation
 The API client defines TypeScript interfaces for each resource. Validation is primarily enforced by the backend; the client surfaces errors via normalized responses and toast notifications. Example models include:
@@ -241,8 +263,9 @@ The API client defines TypeScript interfaces for each resource. Validation is pr
 - KeuanganPerkara, SisaPanjar, Mou, LraReport
 - **MediasiSk**: { id?, tahun, link_sk_hakim?, link_sk_non_hakim?, created_at?, updated_at? }
 - **MediatorBanner**: { id?, judul, image_url, type: 'hakim' | 'non-hakim', created_at?, updated_at? }
+- **SkInovasi**: { id: number, tahun: number, nomor_sk: string, tentang: string, file_path?: string, file_url?: string, is_active: boolean, created_at?: string, updated_at?: string }
 
-**Updated** Added new data models for Mediasi management with proper typing for file upload fields and categorization.
+**Updated** Added new data model for SK Inovasi with comprehensive typing for file upload fields, URL-based content, and activation status.
 
 Validation patterns:
 - Enumerated fields (e.g., LaporanPengaduan.materi_pengaduan) restrict values.
@@ -250,9 +273,12 @@ Validation patterns:
 - Date fields are handled as ISO strings and formatted for display.
 - **Mediasi SK**: Tahun harus berupa angka positif, link file atau URL opsional.
 - **Mediator Banner**: Judul harus diisi, image_url bisa berupa file atau URL, type harus 'hakim' atau 'non-hakim'.
+- **Sk Inovasi**: Tahun harus berupa angka positif, nomor_sk dan tentang harus diisi, file_path/file_url bersifat opsional, is_active harus boolean.
 
 **Section sources**
-- [api.ts:5-1233](file://lib/api.ts#L5-L1233)
+- [api.ts:43-64](file://lib/api.ts#L43-L64)
+- [api.ts:1179-1195](file://lib/api.ts#L1179-L1195)
+- [api.ts:1335-1385](file://lib/api.ts#L1335-L1385)
 
 ### Toast Notification System
 - Provider and components: Radix-based toast provider and UI components.
@@ -298,7 +324,7 @@ Integration:
   - Normalize errors via API client or custom handlers.
   - Display user-friendly messages via toast.
 
-**Updated** Added comprehensive examples for Mediasi management operations including file upload handling and form data construction.
+**Updated** Added comprehensive examples for SK Inovasi management operations including file upload handling and form data construction with dual support for URL-based content and direct file uploads.
 
 **Section sources**
 - [panggilan/page.tsx:42-90](file://app/panggilan/page.tsx#L42-L90)
@@ -306,13 +332,37 @@ Integration:
 - [laporan-pengaduan/page.tsx:43-117](file://app/laporan-pengaduan/page.tsx#L43-L117)
 - [mediasi/sk/tambah/page.tsx:20-38](file://app/mediasi/sk/tambah/page.tsx#L20-L38)
 - [mediasi/banners/tambah/page.tsx:22-41](file://app/mediasi/banners/tambah/page.tsx#L22-L41)
+- [sk-inovasi/tambah/page.tsx:30-65](file://app/sk-inovasi/tambah/page.tsx#L30-L65)
+- [sk-inovasi/[id]/edit/page.tsx:51-86](file://app/sk-inovasi/[id]/edit/page.tsx#L51-L86)
+
+### SK Inovasi Management Endpoints
+**New Section** Comprehensive SK Inovasi management capabilities for annual innovation decision documents.
+
+#### SK Inovasi Management
+- getAllSkInovasi: Retrieve all SK Inovasi records with optional tahun and active filters
+- getSkInovasi: Retrieve single SK Inovasi record by ID
+- createSkInovasi: Create new SK Inovasi with file upload support (PDF, DOC, DOCX)
+- updateSkInovasi: Update existing SK Inovasi with file replacement or URL update
+- deleteSkInovasi: Remove SK Inovasi records
+
+#### SK Inovasi Data Model Features
+- Dual content support: Either file upload (PDF/DOC/DOCX) OR external URL (Google Drive)
+- Activation control: is_active flag to enable/disable SK Inovasi visibility
+- Comprehensive metadata: tahun, nomor_sk, tentang with proper validation
+- Flexible file handling: file_path vs file_url with automatic override behavior
+
+**Section sources**
+- [api.ts:1335-1385](file://lib/api.ts#L1335-L1385)
+- [sk-inovasi/page.tsx:20-64](file://app/sk-inovasi/page.tsx#L20-L64)
+- [sk-inovasi/tambah/page.tsx:17-65](file://app/sk-inovasi/tambah/page.tsx#L17-L65)
+- [sk-inovasi/[id]/edit/page.tsx:17-86](file://app/sk-inovasi/[id]/edit/page.tsx#L17-L86)
 
 ### Mediasi Management Endpoints
-**New Section** Comprehensive Mediasi management capabilities for SK (Surat Keputusan) and banner management.
+**Updated** Enhanced Mediasi management capabilities with comprehensive SK and banner management.
 
 #### Mediasi SK Management
 - getAllMediasiSk: Retrieve all SK records with pagination support
-- createMediasiSk: Create new SK record with file upload support
+- createMediasiSk: Create new SK record with PDF file upload support
 - updateMediasiSk: Update existing SK record with file replacement
 - deleteMediasiSk: Remove SK records
 
@@ -323,7 +373,7 @@ Integration:
 - deleteMediatorBanner: Remove banner records
 
 **Section sources**
-- [api.ts:1149-1233](file://lib/api.ts#L1149-L1233)
+- [api.ts:1179-1273](file://lib/api.ts#L1179-L1273)
 - [mediasi/page.tsx:38-222](file://app/mediasi/page.tsx#L38-L222)
 - [mediasi/sk/tambah/page.tsx:15-112](file://app/mediasi/sk/tambah/page.tsx#L15-L112)
 - [mediasi/banners/tambah/page.tsx:16-112](file://app/mediasi/banners/tambah/page.tsx#L16-L112)
@@ -381,6 +431,7 @@ Utils["lib/utils.ts"] --> Pages
   - Implement progress indicators for large file uploads.
   - Consider chunked uploads for very large files.
   - Cache uploaded files temporarily to reduce re-upload overhead.
+  - **SK Inovasi File Handling**: Support both direct file uploads and URL-based content with automatic override behavior.
 
 ## Troubleshooting Guide
 Common issues and debugging techniques:
@@ -399,6 +450,10 @@ Common issues and debugging techniques:
   - Verify FormData construction includes proper file fields and metadata.
   - Check server-side file upload limits and allowed MIME types.
   - Ensure _method=PUT is appended for update operations with file uploads.
+- **SK Inovasi File Upload Issues**:
+  - Verify FormData includes either 'file' (direct upload) OR 'file_url' (URL-based content).
+  - Check server-side file upload limits and allowed MIME types (.pdf, .doc, .docx).
+  - Ensure proper field naming: 'tahun', 'nomor_sk', 'tentang', 'is_active', 'file_url', 'file'.
 
 **Section sources**
 - [api.ts:1-4](file://lib/api.ts#L1-L4)
@@ -408,7 +463,7 @@ Common issues and debugging techniques:
 - [use-toast.ts:174-192](file://hooks/use-toast.ts#L174-L192)
 
 ## Conclusion
-The centralized API client provides a consistent, typed interface for interacting with multiple backend resources. Combined with a robust toast notification system and well-structured pages, it enables reliable CRUD operations, responsive UIs, and clear user feedback. The addition of comprehensive Mediasi management capabilities enhances the system's ability to handle complex document and media management scenarios. Extending the client with caching, retries, and offline capabilities will further improve reliability and performance.
+The centralized API client provides a consistent, typed interface for interacting with multiple backend resources. Combined with a robust toast notification system and well-structured pages, it enables reliable CRUD operations, responsive UIs, and clear user feedback. The addition of comprehensive SK Inovasi management capabilities significantly enhances the system's ability to handle complex document and media management scenarios with flexible file upload options. Extending the client with caching, retries, and offline capabilities will further improve reliability and performance.
 
 ## Appendices
 
@@ -441,19 +496,27 @@ The centralized API client provides a consistent, typed interface for interactin
   - POST /mediator-banners (supports FormData with image files)
   - POST /mediator-banners/:id (with _method=PUT for FormData)
   - DELETE /mediator-banners/:id
+- **SK Inovasi Management**
+  - GET /sk-inovasi?tahun=&active=
+  - GET /sk-inovasi/:id
+  - POST /sk-inovasi (supports FormData with PDF/DOC/DOCX files OR URL-based content)
+  - POST /sk-inovasi/:id (with _method=PUT for FormData)
+  - DELETE /sk-inovasi/:id
 
-**Updated** Added comprehensive Mediasi endpoint specifications with proper file upload handling.
+**Updated** Added comprehensive SK Inovasi endpoint specifications with proper file upload handling and dual content support.
 
 Notes:
 - All endpoints include X-API-Key header.
 - Some endpoints return { status: 'success'|'error', ... } which is normalized to a standard shape.
 - **Mediasi endpoints support both file uploads and URL-based content**.
+- **SK Inovasi endpoints support both direct file uploads and external URL content with automatic override behavior**.
 
 **Section sources**
 - [api.ts:97-149](file://lib/api.ts#L97-L149)
 - [api.ts:292-334](file://lib/api.ts#L292-L334)
 - [api.ts:788-850](file://lib/api.ts#L788-L850)
-- [api.ts:1149-1233](file://lib/api.ts#L1149-L1233)
+- [api.ts:1179-1273](file://lib/api.ts#L1179-L1273)
+- [api.ts:1335-1385](file://lib/api.ts#L1335-L1385)
 
 ### UI Integration Patterns
 - Loading states:
@@ -468,8 +531,13 @@ Notes:
   - Construct FormData with proper field names for file uploads.
   - Handle optional file fields and URL alternatives.
   - Display current file information with preview links.
+- **SK Inovasi Forms**:
+  - Support dual content input: direct file upload OR URL-based content.
+  - Automatic field validation for required fields (tahun, nomor_sk, tentang).
+  - File override behavior: direct upload replaces URL-based content.
+  - Status toggle for activation/deactivation.
 
-**Updated** Added comprehensive UI integration patterns for Mediasi management forms.
+**Updated** Added comprehensive UI integration patterns for SK Inovasi management forms with dual content support.
 
 **Section sources**
 - [panggilan/page.tsx:30-137](file://app/panggilan/page.tsx#L30-L137)
@@ -478,6 +546,9 @@ Notes:
 - [mediasi/page.tsx:38-222](file://app/mediasi/page.tsx#L38-L222)
 - [mediasi/sk/tambah/page.tsx:20-112](file://app/mediasi/sk/tambah/page.tsx#L20-L112)
 - [mediasi/banners/tambah/page.tsx:22-112](file://app/mediasi/banners/tambah/page.tsx#L22-L112)
+- [sk-inovasi/page.tsx:20-64](file://app/sk-inovasi/page.tsx#L20-L64)
+- [sk-inovasi/tambah/page.tsx:17-65](file://app/sk-inovasi/tambah/page.tsx#L17-L65)
+- [sk-inovasi/[id]/edit/page.tsx:17-86](file://app/sk-inovasi/[id]/edit/page.tsx#L17-L86)
 
 ### Data Model Specifications
 - **MediasiSk**
@@ -492,8 +563,18 @@ Notes:
   - type: 'hakim' | 'non-hakim' (required) - Kategori mediator
   - created_at: string - Timestamp pembuatan
   - updated_at: string - Timestamp pembaruan
+- **SkInovasi**
+  - tahun: number (required) - Tahun SK Inovasi
+  - nomor_sk: string (required) - Nomor SK
+  - tentang: string (required) - Deskripsi SK
+  - file_path: string | null - Path file lokal
+  - file_url: string | null - URL dokumen eksternal
+  - is_active: boolean (required) - Status aktif/nonaktif
+  - created_at: string - Timestamp pembuatan
+  - updated_at: string - Timestamp pembaruan
 
-**Updated** Added comprehensive data model specifications for Mediasi management.
+**Updated** Added comprehensive data model specifications for SK Inovasi management with dual content support.
 
 **Section sources**
-- [api.ts:1150-1166](file://lib/api.ts#L1150-L1166)
+- [api.ts:1179-1195](file://lib/api.ts#L1179-L1195)
+- [api.ts:1335-1385](file://lib/api.ts#L1335-L1385)

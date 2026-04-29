@@ -63,6 +63,20 @@ export interface SkInovasi {
   updated_at?: string;
 }
 
+export interface SkRadiusBiaya {
+  id: number;
+  tahun: number;
+  nomor_sk: string;
+  tentang: string;
+  file_path?: string;
+  file_url?: string;
+  is_active: boolean;
+  metadata_json?: string;
+  metadata?: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+}
+
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -1775,3 +1789,62 @@ export async function deleteSurveyPekan(id: number): Promise<ApiResponse<null>> 
   });
   return normalizeApiResponse<null>(response);
 }
+<<<<<<< Updated upstream
+=======
+
+// ==========================================
+// API SK RADIUS BIAYA
+// ==========================================
+
+// GET - Ambil semua data SK Radius Biaya
+export async function getAllSkRadiusBiaya(tahun?: number, active?: boolean): Promise<ApiResponse<SkRadiusBiaya[]>> {
+  const qs: string[] = [];
+  if (tahun) qs.push(`tahun=${tahun}`);
+  if (active !== undefined) qs.push(`active=${active ? 1 : 0}`);
+  const url = `${API_URL}/radius-biaya${qs.length > 0 ? '?' + qs.join('&') : ''}`;
+  const response = await fetch(url, { cache: 'no-store' });
+  return normalizeApiResponse<SkRadiusBiaya[]>(response);
+}
+
+// GET - Ambil satu data SK Radius Biaya
+export async function getSkRadiusBiaya(id: number): Promise<SkRadiusBiaya | null> {
+  const response = await fetch(`${API_URL}/radius-biaya/${id}`, { cache: 'no-store' });
+  const result = await normalizeApiResponse<SkRadiusBiaya>(response);
+  return result.data || null;
+}
+
+// POST - Tambah data SK Radius Biaya baru
+export async function createSkRadiusBiaya(data: FormData | Partial<SkRadiusBiaya>): Promise<ApiResponse<SkRadiusBiaya>> {
+  const isFormData = data instanceof FormData;
+  const response = await fetch(`${API_URL}/radius-biaya`, {
+    method: 'POST',
+    headers: getHeaders(isFormData),
+    body: isFormData ? data : JSON.stringify(data),
+  });
+  return normalizeApiResponse<SkRadiusBiaya>(response);
+}
+
+// PUT - Update data SK Radius Biaya
+export async function updateSkRadiusBiaya(id: number, data: FormData | Partial<SkRadiusBiaya>): Promise<ApiResponse<SkRadiusBiaya>> {
+  const isFormData = data instanceof FormData;
+  const method = isFormData ? 'POST' : 'PUT';
+  if (isFormData) {
+    (data as FormData).append('_method', 'PUT');
+  }
+  const response = await fetch(`${API_URL}/radius-biaya/${id}`, {
+    method,
+    headers: getHeaders(isFormData),
+    body: isFormData ? data : JSON.stringify(data),
+  });
+  return normalizeApiResponse<SkRadiusBiaya>(response);
+}
+
+// DELETE - Hapus data SK Radius Biaya
+export async function deleteSkRadiusBiaya(id: number): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_URL}/radius-biaya/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  return normalizeApiResponse<null>(response);
+}
+>>>>>>> Stashed changes

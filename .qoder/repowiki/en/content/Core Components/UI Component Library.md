@@ -14,10 +14,20 @@
 - [card.tsx](file://components/ui/card.tsx)
 - [dialog.tsx](file://components/ui/dialog.tsx)
 - [table.tsx](file://components/ui/table.tsx)
+- [tabs.tsx](file://components/ui/tabs.tsx)
 - [tailwind.config.ts](file://tailwind.config.ts)
 - [utils.ts](file://lib/utils.ts)
 - [components.json](file://components.json)
+- [page.tsx](file://app/mediasi/page.tsx)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added comprehensive documentation for the new Tabs component implementation
+- Included detailed analysis of Tabs, TabsList, TabsTrigger, and TabsContent components
+- Added usage examples from the real-world implementation in the mediasi page
+- Updated component architecture overview to include the new Tabs component family
+- Enhanced dependency analysis to show Tabs component relationships
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -32,7 +42,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes the UI component library built on Radix UI primitives and Tailwind CSS. It explains the base component architecture, design system principles, and consistent styling patterns. It covers the button component system (variants and sizes), form input components (input, select, textarea, label), decorative components (avatar, badge, skeleton), and interactive elements (tooltip). It also documents prop interfaces, usage guidance, customization options, accessibility features, component composition patterns, state management, and extension guidelines.
+This document describes the UI component library built on Radix UI primitives and Tailwind CSS. It explains the base component architecture, design system principles, and consistent styling patterns. It covers the button component system (variants and sizes), form input components (input, select, textarea, label), decorative components (avatar, badge, skeleton), interactive elements (tooltip), and the newly added tabbed interface functionality (tabs). It also documents prop interfaces, usage guidance, customization options, accessibility features, component composition patterns, state management, and extension guidelines.
 
 ## Project Structure
 The UI components live under components/ui and are composed with:
@@ -58,6 +68,7 @@ AV["Avatar"]
 BDG["Badge"]
 SK["Skeleton"]
 TP["Tooltip"]
+TAB["Tabs"]
 CARD["Card"]
 DLG["Dialog"]
 TBL["Table"]
@@ -71,6 +82,7 @@ TW --> AV
 TW --> BDG
 TW --> SK
 TW --> TP
+TW --> TAB
 TW --> CARD
 TW --> DLG
 TW --> TBL
@@ -85,6 +97,7 @@ CN --> AV
 CN --> BDG
 CN --> SK
 CN --> TP
+CN --> TAB
 CN --> CARD
 CN --> DLG
 CN --> TBL
@@ -96,6 +109,7 @@ CN --> TBL
 - [badge.tsx:6-24](file://components/ui/badge.tsx#L6-L24)
 - [label.tsx:9-11](file://components/ui/label.tsx#L9-L11)
 - [utils.ts:4-6](file://lib/utils.ts#L4-L6)
+- [tabs.tsx:1-56](file://components/ui/tabs.tsx#L1-L56)
 
 **Section sources**
 - [tailwind.config.ts:1-106](file://tailwind.config.ts#L1-L106)
@@ -113,6 +127,7 @@ This section summarizes the foundational building blocks and their roles in the 
 - Badge: Lightweight indicator with variant-based color schemes.
 - Skeleton: Pulse animation container for loading states.
 - Tooltip: Provider-root-trigger-content triad with portal rendering and directional animations.
+- Tabs: Tabbed interface system with Tabs, TabsList, TabsTrigger, and TabsContent components for accessible tab navigation.
 - Card: Container with header, title, description, content, and footer slots.
 - Dialog: Overlay, content, header/footer, title, and description with close button.
 - Table: Scrollable wrapper plus table, thead, tbody, tfoot, tr, th, td, caption.
@@ -127,6 +142,7 @@ This section summarizes the foundational building blocks and their roles in the 
 - [badge.tsx:26-36](file://components/ui/badge.tsx#L26-L36)
 - [skeleton.tsx:3-15](file://components/ui/skeleton.tsx#L3-L15)
 - [tooltip.tsx:8-32](file://components/ui/tooltip.tsx#L8-L32)
+- [tabs.tsx:8-55](file://components/ui/tabs.tsx#L8-L55)
 - [card.tsx:5-76](file://components/ui/card.tsx#L5-L76)
 - [dialog.tsx:9-122](file://components/ui/dialog.tsx#L9-L122)
 - [table.tsx:5-120](file://components/ui/table.tsx#L5-L120)
@@ -137,7 +153,7 @@ The library follows a consistent pattern:
 - Apply Tailwind classes for styling and design tokens
 - Use cva for variant-driven styles
 - Use cn() to merge classes safely
-- Compose small, focused components into larger ones (e.g., Card parts, Select parts)
+- Compose small, focused components into larger ones (e.g., Card parts, Select parts, Tabs parts)
 
 ```mermaid
 graph LR
@@ -151,6 +167,7 @@ C --> U["Usage in App Pages"]
 **Diagram sources**
 - [button.tsx:1-6](file://components/ui/button.tsx#L1-L6)
 - [select.tsx:1-8](file://components/ui/select.tsx#L1-L8)
+- [tabs.tsx:1-6](file://components/ui/tabs.tsx#L1-L6)
 - [tailwind.config.ts:20-77](file://tailwind.config.ts#L20-L77)
 - [utils.ts:4-6](file://lib/utils.ts#L4-L6)
 
@@ -184,6 +201,67 @@ Button --> buttonVariants : "uses"
 **Section sources**
 - [button.tsx:7-35](file://components/ui/button.tsx#L7-L35)
 - [button.tsx:37-57](file://components/ui/button.tsx#L37-L57)
+
+### Tabs System
+
+**Updated** Added comprehensive documentation for the new Tabs component system
+
+The Tabs component system provides accessible tabbed interface functionality built on Radix UI primitives. It consists of four main components that work together to create a fully functional tabbed interface.
+
+#### Tabs Root Component
+- Purpose: Container component that manages the state of the tabbed interface
+- Props: Inherits all props from Radix UI Tabs Root primitive
+- State Management: Handles active tab state and keyboard navigation
+- Accessibility: Provides proper ARIA attributes and keyboard interaction
+
+#### TabsList Component
+- Purpose: Container for tab triggers with flexible layout options
+- Styling: Uses muted background with foreground text color
+- Layout Options: Supports grid layouts for responsive tab arrangements
+- Active State: Background changes to main background when active
+
+#### TabsTrigger Component
+- Purpose: Individual tab activation controls
+- Active State: Changes background to main background, text to foreground, and adds shadow
+- Disabled State: Reduces opacity and disables pointer events
+- Focus States: Includes focus-visible ring with ring color
+- Transition Effects: Smooth transitions for state changes
+
+#### TabsContent Component
+- Purpose: Container for tab panel content
+- Focus States: Includes focus-visible ring for keyboard navigation
+- Spacing: Adds margin-top for visual separation from tab headers
+
+```mermaid
+classDiagram
+class Tabs {
++defaultValue : string
++value : string
++onValueChange : function
++className : string
+}
+class TabsList {
++className : string
+}
+class TabsTrigger {
++value : string
++disabled : boolean
++className : string
+}
+class TabsContent {
++value : string
++className : string
+}
+Tabs --> TabsList : "contains"
+TabsList --> TabsTrigger : "contains"
+Tabs --> TabsContent : "contains"
+```
+
+**Diagram sources**
+- [tabs.tsx:8-55](file://components/ui/tabs.tsx#L8-L55)
+
+**Section sources**
+- [tabs.tsx:8-55](file://components/ui/tabs.tsx#L8-L55)
 
 ### Form Inputs
 
@@ -364,7 +442,7 @@ Card <|-- CardFooter
 
 ## Dependency Analysis
 The components share common dependencies and patterns:
-- Radix UI: Used across Select, Tooltip, Dialog, Label, Avatar, and others for accessible semantics.
+- Radix UI: Used across Select, Tooltip, Dialog, Label, Avatar, Tabs, and others for accessible semantics.
 - Tailwind: Provides design tokens (colors, spacing, radii, shadows, animations).
 - cva: Centralized variant definitions for Button, Badge, Label.
 - cn(): Merges Tailwind classes consistently.
@@ -377,12 +455,14 @@ TP["Tooltip"] --> RAD
 DLG["Dialog"] --> RAD
 LAB["Label"] --> RAD
 AV["Avatar"] --> RAD
+TAB["Tabs"] --> RAD
 BTN --> TW["Tailwind"]
 INP["Input"] --> TW
 SEL --> TW
 TXT["Textarea"] --> TW
 LAB --> TW
 AV["Avatar"] --> TW
+TAB["Tabs"] --> TW
 BDG["Badge"] --> TW
 SK["Skeleton"] --> TW
 TP["Tooltip"] --> TW
@@ -397,6 +477,7 @@ INP --> CN
 SEL --> CN
 TXT --> CN
 AV --> CN
+TAB --> CN
 BDG --> CN
 SK --> CN
 TP --> CN
@@ -412,6 +493,7 @@ TBL --> CN
 - [dialog.tsx:1-8](file://components/ui/dialog.tsx#L1-L8)
 - [label.tsx:1-8](file://components/ui/label.tsx#L1-L8)
 - [avatar.tsx:1-7](file://components/ui/avatar.tsx#L1-L7)
+- [tabs.tsx:1-6](file://components/ui/tabs.tsx#L1-L6)
 - [badge.tsx:1-5](file://components/ui/badge.tsx#L1-L5)
 - [tailwind.config.ts:20-77](file://tailwind.config.ts#L20-L77)
 - [utils.ts:4-6](file://lib/utils.ts#L4-L6)
@@ -423,6 +505,7 @@ TBL --> CN
 - [dialog.tsx:1-8](file://components/ui/dialog.tsx#L1-L8)
 - [label.tsx:1-8](file://components/ui/label.tsx#L1-L8)
 - [avatar.tsx:1-7](file://components/ui/avatar.tsx#L1-L7)
+- [tabs.tsx:1-6](file://components/ui/tabs.tsx#L1-L6)
 - [badge.tsx:1-5](file://components/ui/badge.tsx#L1-L5)
 - [tailwind.config.ts:20-77](file://tailwind.config.ts#L20-L77)
 - [utils.ts:4-6](file://lib/utils.ts#L4-L6)
@@ -430,9 +513,10 @@ TBL --> CN
 ## Performance Considerations
 - Prefer variant props over ad hoc class overrides to keep the variant set small and predictable.
 - Use cn() to avoid redundant or conflicting Tailwind classes.
-- Keep animations minimal; tooltips and selects already apply subtle transitions.
+- Keep animations minimal; tooltips, selects, and tabs already apply subtle transitions.
 - Defer heavy DOM work inside portals to reduce layout thrash.
 - Reuse shared design tokens to minimize CSS bloat.
+- Tabs content is lazy-loaded by default through Radix UI, improving initial render performance.
 
 ## Troubleshooting Guide
 - Button not responding to clicks:
@@ -441,6 +525,10 @@ TBL --> CN
   - Confirm the Select is wrapped in a Portal and positioned correctly; check viewport sizing and trigger height.
 - Tooltip not appearing:
   - Verify TooltipProvider is enabled and TooltipTrigger is attached to a focusable element.
+- Tabs not switching content:
+  - Ensure TabsTrigger values match corresponding TabsContent values.
+  - Check that TabsList wraps all TabsTrigger components.
+  - Verify defaultValue prop is set correctly on Tabs root.
 - Input/Textarea focus ring missing:
   - Ensure focus-visible ring classes are not overridden; confirm Tailwind theme includes ring colors.
 - Badge or Label variant not applying:
@@ -450,12 +538,13 @@ TBL --> CN
 - [button.tsx:43-53](file://components/ui/button.tsx#L43-L53)
 - [select.tsx:70-99](file://components/ui/select.tsx#L70-L99)
 - [tooltip.tsx:8-32](file://components/ui/tooltip.tsx#L8-L32)
+- [tabs.tsx:112-122](file://app/mediasi/page.tsx#L112-L122)
 - [tailwind.config.ts:20-77](file://tailwind.config.ts#L20-L77)
 - [badge.tsx:6-24](file://components/ui/badge.tsx#L6-L24)
 - [label.tsx:9-11](file://components/ui/label.tsx#L9-L11)
 
 ## Conclusion
-The UI component library leverages Radix UI for accessibility and Tailwind for a cohesive design system. Components are structured around variant-driven styling with cva, consistent class merging via cn(), and clear composition patterns. This enables predictable customization, strong accessibility, and maintainable extensions across the application.
+The UI component library leverages Radix UI for accessibility and Tailwind for a cohesive design system. Components are structured around variant-driven styling with cva, consistent class merging via cn(), and clear composition patterns. The addition of the Tabs component system completes the component library with comprehensive tabbed interface functionality, providing accessible navigation patterns that integrate seamlessly with the existing design system.
 
 ## Appendices
 
@@ -471,8 +560,8 @@ The UI component library leverages Radix UI for accessibility and Tailwind for a
 
 ### Extending Components
 - Add a new variant:
-  - Extend cva in the component’s file and export the updated variant function.
-  - Update the component’s prop interface to include the new variant option.
+  - Extend cva in the component's file and export the updated variant function.
+  - Update the component's prop interface to include the new variant option.
 - Introduce a new component:
   - Place it under components/ui with a clear name.
   - Use cn() for class merging and Tailwind tokens for styling.
@@ -486,3 +575,34 @@ The UI component library leverages Radix UI for accessibility and Tailwind for a
 - [badge.tsx:6-24](file://components/ui/badge.tsx#L6-L24)
 - [utils.ts:4-6](file://lib/utils.ts#L4-L6)
 - [tailwind.config.ts:20-77](file://tailwind.config.ts#L20-L77)
+
+### Tabs Component Usage Examples
+
+**Real-world Implementation** The Tabs component is used extensively in the mediasi page for organizing content into logical sections.
+
+```typescript
+// Basic Tabs structure with two tab panels
+<Tabs defaultValue="sk" className="w-full">
+  <TabsList className="grid w-full grid-cols-2 max-w-[400px] mb-4">
+    <TabsTrigger value="sk" className="flex items-center gap-2">
+      <FileText className="h-4 w-4" /> SK Tahunan
+    </TabsTrigger>
+    <TabsTrigger value="banner" className="flex items-center gap-2">
+      <Users className="h-4 w-4" /> Banner Mediator
+    </TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="sk">
+    {/* SK content goes here */}
+  </TabsContent>
+
+  <TabsContent value="banner">
+    {/* Banner content goes here */}
+  </TabsContent>
+</Tabs>
+```
+
+**Section sources**
+- [page.tsx:112-122](file://app/mediasi/page.tsx#L112-L122)
+- [page.tsx:125-202](file://app/mediasi/page.tsx#L125-L202)
+- [page.tsx:204-261](file://app/mediasi/page.tsx#L204-L261)
