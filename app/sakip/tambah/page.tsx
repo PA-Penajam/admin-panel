@@ -23,6 +23,8 @@ function SakipForm() {
 
     const [formData, setFormData] = useState<Partial<Sakip>>({
         tahun: new Date().getFullYear(),
+        tanggal_publish: new Date().toISOString().slice(0, 10),
+        link_dokumen: '',
     });
 
     const [fileDokumen, setFileDokumen] = useState<File | null>(null);
@@ -45,8 +47,11 @@ function SakipForm() {
         setLoading(true);
         try {
             const dataToSend = new FormData();
-            Object.entries(formData).forEach(([key, val]) => {
-                if (val !== null && val !== undefined) dataToSend.append(key, String(val));
+            (['tahun', 'jenis_dokumen', 'uraian', 'link_dokumen', 'tanggal_publish'] as const).forEach(key => {
+                const val = formData[key];
+                if (val !== null && val !== undefined && String(val).trim() !== '') {
+                    dataToSend.append(key, String(val));
+                }
             });
             if (fileDokumen) dataToSend.append('file_dokumen', fileDokumen);
 
@@ -116,6 +121,25 @@ function SakipForm() {
                             placeholder='Masukkan uraian atau deskripsi dokumen (opsional)...'
                             rows={4}
                         />
+                    </div>
+
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        <div className='space-y-2'>
+                            <Label>Link Dokumen</Label>
+                            <Input
+                                value={formData.link_dokumen || ''}
+                                onChange={e => setFormData(prev => ({ ...prev, link_dokumen: e.target.value }))}
+                                placeholder='https://drive.google.com/...'
+                            />
+                        </div>
+                        <div className='space-y-2'>
+                            <Label>Tanggal Publish</Label>
+                            <Input
+                                type='date'
+                                value={formData.tanggal_publish || ''}
+                                onChange={e => setFormData(prev => ({ ...prev, tanggal_publish: e.target.value }))}
+                            />
+                        </div>
                     </div>
 
                     <div className='space-y-2'>

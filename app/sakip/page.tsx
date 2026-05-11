@@ -1,7 +1,7 @@
 'use client';
 
 import { MagicDeleteDialog } from '@/components/custom/magic-delete-dialog';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { getAllSakip, deleteSakip, JENIS_DOKUMEN_SAKIP, type Sakip } from '@/lib/api';
 import { getYearOptions } from '@/lib/utils';
@@ -14,12 +14,15 @@ import {
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
+import {
+    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
+} from '@/components/ui/dialog';
 
 import {
     Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, RefreshCw, Trash2, Edit, ExternalLink, Search } from 'lucide-react';
+import { PlusCircle, RefreshCw, Trash2, Edit, ExternalLink, Search, History } from 'lucide-react';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -34,6 +37,7 @@ export default function SakipList() {
     const [filterJenis, setFilterJenis] = useState<string>('all');
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [selectedHistory, setSelectedHistory] = useState<Sakip | null>(null);
     const { toast } = useToast();
 
     const [pagination, setPagination] = useState({
@@ -42,7 +46,7 @@ export default function SakipList() {
         total: 0
     });
 
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const tahun = filterTahun !== 'all' ? parseInt(filterTahun) : undefined;
@@ -61,11 +65,11 @@ export default function SakipList() {
             setAllData([]);
         }
         setLoading(false);
-    };
+    }, [filterTahun, toast]);
 
     useEffect(() => {
         loadData();
-    }, [filterTahun]);
+    }, [loadData]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -145,6 +149,22 @@ export default function SakipList() {
         pagination.current_page * PAGE_SIZE
     );
 
+    const formatDate = (value?: string | null) => {
+        if (!value) return '—';
+        const [datePart] = value.split('T');
+        const [year, month, day] = datePart.split('-');
+        if (year && month && day) return `${day}/${month}/${year}`;
+        return value;
+    };
+
+    const getActiveDocument = (item: Sakip) => (
+        item.latest_revision?.link_dokumen || item.dokumen_aktif || item.link_dokumen
+    );
+
+    const getActiveLabel = (item: Sakip) => (
+        item.latest_revision ? `Revisi ${item.latest_revision.revisi_ke}` : 'Dokumen Awal'
+    );
+
     return (
         <div className="space-y-6">
             <BlurFade delay={0.1} inView>
@@ -194,7 +214,7 @@ export default function SakipList() {
                                     ))}
                                 </SelectContent>
                             </Select>
-                            <Select value={filterJenis} onValueChange={v => setPagination(prev => ({ ...prev, current_page: 1 }))}>
+                            <Select value={filterJenis} onValueChange={v => { setFilterJenis(v); setPagination(prev => ({ ...prev, current_page: 1 })); }}>
                                 <SelectTrigger className="w-full sm:w-[200px]">
                                     <SelectValue placeholder="Semua Jenis" />
                                 </SelectTrigger>
@@ -251,9 +271,9 @@ export default function SakipList() {
                                                     {item.uraian || <span className="italic text-xs">—</span>}
                                                 </TableCell>
                                                 <TableCell className="text-center">
-                                                    {item.link_dokumen ? (
+                                                    {getActiveDocument(item) ? (
                                                         <a
-                                                            href={item.link_dokumen}
+                                                            href={getActiveDocument(item) || ''}
                                                             target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-1 text-indigo-600 hover:underline text-sm"
@@ -263,9 +283,21 @@ export default function SakipList() {
                                                     ) : (
                                                         <span className="text-muted-foreground text-xs italic">Belum tersedia</span>
                                                     )}
+                                                    <div className="mt-1 text-[11px] text-muted-foreground">
+                                                        {getActiveLabel(item)}
+                                                    </div>
                                                 </TableCell>
                                                 <TableCell className="text-right">
                                                     <div className="flex justify-end gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 hover:text-indigo-600"
+                                                            onClick={() => setSelectedHistory(item)}
+                                                            title="History revisi"
+                                                        >
+                                                            <History className="h-4 w-4" />
+                                                        </Button>
                                                         <Link href={`/sakip/${item.id}/edit`}>
                                                             <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-blue-600">
                                                                 <Edit className="h-4 w-4" />
@@ -331,6 +363,79 @@ export default function SakipList() {
         title="Konfirmasi Hapus"
         description="Apakah Anda yakin ingin menghapus data ini? Tindakan tidak dapat dibatalkan."
       />
+
+            <Dialog open={!!selectedHistory} onOpenChange={open => !open && setSelectedHistory(null)}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>History Dokumen SAKIP</DialogTitle>
+                        <DialogDescription>
+                            {selectedHistory?.jenis_dokumen} Tahun {selectedHistory?.tahun}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedHistory && (
+                        <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
+                            <div className="rounded-md border p-3">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <Badge variant="outline">Dokumen Awal</Badge>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            Publish: {formatDate(selectedHistory.tanggal_publish)}
+                                        </p>
+                                    </div>
+                                    {selectedHistory.link_dokumen ? (
+                                        <a
+                                            href={selectedHistory.link_dokumen}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center justify-center gap-1 rounded-md border px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50"
+                                        >
+                                            <ExternalLink className="h-3 w-3" /> Buka Dokumen
+                                        </a>
+                                    ) : (
+                                        <span className="text-xs italic text-muted-foreground">Belum tersedia</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {selectedHistory.revisions && selectedHistory.revisions.length > 0 ? (
+                                selectedHistory.revisions.map(revision => (
+                                    <div key={revision.id || revision.revisi_ke} className="rounded-md border p-3">
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                            <div className="space-y-2">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <Badge className="bg-indigo-600">Revisi {revision.revisi_ke}</Badge>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        Publish: {formatDate(revision.tanggal_publish)}
+                                                    </span>
+                                                </div>
+                                                {revision.keterangan && (
+                                                    <p className="text-sm text-muted-foreground">{revision.keterangan}</p>
+                                                )}
+                                            </div>
+                                            {revision.link_dokumen ? (
+                                                <a
+                                                    href={revision.link_dokumen}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center gap-1 rounded-md border px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50"
+                                                >
+                                                    <ExternalLink className="h-3 w-3" /> Buka Dokumen
+                                                </a>
+                                            ) : (
+                                                <span className="text-xs italic text-muted-foreground">Belum tersedia</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
+                                    Belum ada history revisi.
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

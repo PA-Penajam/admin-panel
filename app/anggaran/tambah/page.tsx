@@ -83,15 +83,7 @@ export default function AnggaranAdd() {
             });
             if (fileDokumen) dataToSend.append('file_dokumen', fileDokumen);
 
-            // Karena kita mengirim FormData, kita buat fungsi khusus fetch di sini atau update api.ts
-            // Untuk kesederhanaan sementara, kita asumsikan api.ts bisa handle FormData
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/anggaran`, {
-                method: 'POST',
-                headers: { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '' },
-                body: dataToSend,
-            });
-            
-            const result = await response.json();
+            const result = await createAnggaran(dataToSend);
 
             if (result.success) {
                 toast({ title: "Sukses", description: "Data realisasi berhasil disimpan!" });
@@ -179,7 +171,7 @@ export default function AnggaranAdd() {
                                     <Input type="file" onChange={e => setFileDokumen(e.target.files?.[0] || null)} accept=".pdf,image/*" />
                                     <Upload className="h-4 w-4 text-muted-foreground" />
                                 </div>
-                                <p className="text-[10px] text-muted-foreground italic">File ini akan muncul di kolom 'doc' website publik.</p>
+                                <p className="text-[10px] text-muted-foreground italic">File ini akan muncul di kolom &quot;doc&quot; website publik.</p>
                             </div>
 
                             <div className="space-y-2">

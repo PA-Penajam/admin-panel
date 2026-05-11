@@ -1,6 +1,5 @@
 // API Configuration
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+const API_URL = '/api/proxy';
 
 export interface Panggilan {
   id?: number;
@@ -63,20 +62,6 @@ export interface SkInovasi {
   updated_at?: string;
 }
 
-export interface SkRadiusBiaya {
-  id: number;
-  tahun: number;
-  nomor_sk: string;
-  tentang: string;
-  file_path?: string;
-  file_url?: string;
-  is_active: boolean;
-  metadata_json?: string;
-  metadata?: Record<string, unknown>;
-  created_at?: string;
-  updated_at?: string;
-}
-
 interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -116,11 +101,9 @@ const normalizeApiResponse = async <T>(response: Response): Promise<ApiResponse<
   };
 };
 
-// Headers dengan API Key
+// Header request dari browser. API key ditambahkan oleh proxy server-side.
 const getHeaders = (isFormData = false) => {
-  const headers: Record<string, string> = {
-    'X-API-Key': API_KEY,
-  };
+  const headers: Record<string, string> = {};
   if (!isFormData) {
     headers['Content-Type'] = 'application/json';
   }
@@ -481,20 +464,27 @@ export async function getAnggaran(id: number): Promise<RealisasiAnggaran | null>
   return result.data || null;
 }
 
-export async function createAnggaran(data: RealisasiAnggaran): Promise<ApiResponse<RealisasiAnggaran>> {
+export async function createAnggaran(data: RealisasiAnggaran | FormData): Promise<ApiResponse<RealisasiAnggaran>> {
+  const isFormData = data instanceof FormData;
   const response = await fetch(`${API_URL}/anggaran`, {
     method: 'POST',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
+    headers: getHeaders(isFormData),
+    body: isFormData ? data : JSON.stringify(data),
   });
   return normalizeApiResponse<RealisasiAnggaran>(response);
 }
 
-export async function updateAnggaran(id: number, data: Partial<RealisasiAnggaran>): Promise<ApiResponse<RealisasiAnggaran>> {
+export async function updateAnggaran(id: number, data: Partial<RealisasiAnggaran> | FormData): Promise<ApiResponse<RealisasiAnggaran>> {
+  const isFormData = data instanceof FormData;
+  const method = isFormData ? 'POST' : 'PUT';
+  if (isFormData) {
+    (data as FormData).append('_method', 'PUT');
+  }
+
   const response = await fetch(`${API_URL}/anggaran/${id}`, {
-    method: 'PUT',
-    headers: getHeaders(),
-    body: JSON.stringify(data),
+    method,
+    headers: getHeaders(isFormData),
+    body: isFormData ? data : JSON.stringify(data),
   });
   return normalizeApiResponse<RealisasiAnggaran>(response);
 }
@@ -712,12 +702,27 @@ export const JENIS_DOKUMEN_SAKIP = [
 
 export type JenisDokumenSakip = typeof JENIS_DOKUMEN_SAKIP[number];
 
+export interface SakipRevision {
+  id?: number;
+  sakip_id?: number;
+  revisi_ke: number;
+  tanggal_publish?: string | null;
+  keterangan?: string | null;
+  link_dokumen?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Sakip {
   id?: number;
   tahun: number;
   jenis_dokumen: JenisDokumenSakip;
   uraian?: string | null;
   link_dokumen?: string | null;
+  tanggal_publish?: string | null;
+  revisions?: SakipRevision[];
+  latest_revision?: SakipRevision | null;
+  dokumen_aktif?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -1789,62 +1794,3 @@ export async function deleteSurveyPekan(id: number): Promise<ApiResponse<null>> 
   });
   return normalizeApiResponse<null>(response);
 }
-<<<<<<< Updated upstream
-=======
-
-// ==========================================
-// API SK RADIUS BIAYA
-// ==========================================
-
-// GET - Ambil semua data SK Radius Biaya
-export async function getAllSkRadiusBiaya(tahun?: number, active?: boolean): Promise<ApiResponse<SkRadiusBiaya[]>> {
-  const qs: string[] = [];
-  if (tahun) qs.push(`tahun=${tahun}`);
-  if (active !== undefined) qs.push(`active=${active ? 1 : 0}`);
-  const url = `${API_URL}/radius-biaya${qs.length > 0 ? '?' + qs.join('&') : ''}`;
-  const response = await fetch(url, { cache: 'no-store' });
-  return normalizeApiResponse<SkRadiusBiaya[]>(response);
-}
-
-// GET - Ambil satu data SK Radius Biaya
-export async function getSkRadiusBiaya(id: number): Promise<SkRadiusBiaya | null> {
-  const response = await fetch(`${API_URL}/radius-biaya/${id}`, { cache: 'no-store' });
-  const result = await normalizeApiResponse<SkRadiusBiaya>(response);
-  return result.data || null;
-}
-
-// POST - Tambah data SK Radius Biaya baru
-export async function createSkRadiusBiaya(data: FormData | Partial<SkRadiusBiaya>): Promise<ApiResponse<SkRadiusBiaya>> {
-  const isFormData = data instanceof FormData;
-  const response = await fetch(`${API_URL}/radius-biaya`, {
-    method: 'POST',
-    headers: getHeaders(isFormData),
-    body: isFormData ? data : JSON.stringify(data),
-  });
-  return normalizeApiResponse<SkRadiusBiaya>(response);
-}
-
-// PUT - Update data SK Radius Biaya
-export async function updateSkRadiusBiaya(id: number, data: FormData | Partial<SkRadiusBiaya>): Promise<ApiResponse<SkRadiusBiaya>> {
-  const isFormData = data instanceof FormData;
-  const method = isFormData ? 'POST' : 'PUT';
-  if (isFormData) {
-    (data as FormData).append('_method', 'PUT');
-  }
-  const response = await fetch(`${API_URL}/radius-biaya/${id}`, {
-    method,
-    headers: getHeaders(isFormData),
-    body: isFormData ? data : JSON.stringify(data),
-  });
-  return normalizeApiResponse<SkRadiusBiaya>(response);
-}
-
-// DELETE - Hapus data SK Radius Biaya
-export async function deleteSkRadiusBiaya(id: number): Promise<ApiResponse<null>> {
-  const response = await fetch(`${API_URL}/radius-biaya/${id}`, {
-    method: 'DELETE',
-    headers: getHeaders(),
-  });
-  return normalizeApiResponse<null>(response);
-}
->>>>>>> Stashed changes

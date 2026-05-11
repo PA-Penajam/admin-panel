@@ -122,7 +122,7 @@ export default function SkInovasiList() {
                                     ) : data.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={7} className="h-24 text-center">
-                                                Belum ada SK Inovasi. Klik "Tambah SK" untuk memulai.
+                                                Belum ada SK Inovasi. Klik &quot;Tambah SK&quot; untuk memulai.
                                             </TableCell>
                                         </TableRow>
                                     ) : (

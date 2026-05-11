@@ -58,15 +58,7 @@ export default function AnggaranEdit() {
                 if (val !== undefined && val !== null) dataToSend.append(key, String(val));
             });
             if (fileDokumen) dataToSend.append('file_dokumen', fileDokumen);
-            dataToSend.append('_method', 'PUT'); // Laravel/Lumen requirement for Multipart PUT
-
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/anggaran/${id}`, {
-                method: 'POST',
-                headers: { 'X-API-Key': process.env.NEXT_PUBLIC_API_KEY || '' },
-                body: dataToSend,
-            });
-            
-            const result = await response.json();
+            const result = await updateAnggaran(id, dataToSend);
             if (result.success) {
                 toast({ title: "Sukses", description: "Data berhasil diperbarui!" });
                 router.push('/anggaran');

@@ -14,6 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Save, Loader2, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { BlurFade } from '@/components/ui/blur-fade';
+import { Badge } from '@/components/ui/badge';
+
+const today = () => new Date().toISOString().slice(0, 10);
 
 export default function SakipEdit() {
     const router = useRouter();
@@ -25,6 +28,15 @@ export default function SakipEdit() {
     const [fetching, setFetching] = useState(true);
     const [formData, setFormData] = useState<Partial<Sakip>>({});
     const [fileDokumen, setFileDokumen] = useState<File | null>(null);
+    const [isRevision, setIsRevision] = useState(false);
+    const [revisionData, setRevisionData] = useState({
+        link_dokumen: '',
+        tanggal_publish: today(),
+        keterangan_revisi: '',
+    });
+
+    const nextRevision = (formData.revisions?.length || 0) + 1;
+    const hasInitialDocument = Boolean(formData.link_dokumen?.trim());
 
     useEffect(() => {
         const fetchData = async () => {
@@ -43,21 +55,70 @@ export default function SakipEdit() {
             setFetching(false);
         };
         fetchData();
-    }, [id]);
+    }, [id, router, toast]);
+
+    const appendBaseFields = (payload: FormData) => {
+        (['tahun', 'jenis_dokumen', 'uraian', 'link_dokumen', 'tanggal_publish'] as const).forEach(key => {
+            const val = formData[key];
+            if (val !== null && val !== undefined && String(val).trim() !== '') {
+                payload.append(key, String(val));
+            }
+        });
+    };
+
+    const appendRevisionFields = (payload: FormData) => {
+        payload.append('is_revisi', '1');
+        payload.append('tanggal_publish', revisionData.tanggal_publish);
+        if (revisionData.link_dokumen.trim()) {
+            payload.append('link_dokumen', revisionData.link_dokumen.trim());
+        }
+        if (revisionData.keterangan_revisi.trim()) {
+            payload.append('keterangan_revisi', revisionData.keterangan_revisi.trim());
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isRevision && !hasInitialDocument) {
+            toast({
+                title: 'Dokumen awal belum ada',
+                description: 'Simpan dokumen awal terlebih dahulu sebelum membuat revisi.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        if (isRevision && !revisionData.tanggal_publish) {
+            toast({ title: 'Tanggal publish wajib diisi.', variant: 'destructive' });
+            return;
+        }
+
+        if (isRevision && !revisionData.link_dokumen.trim() && !fileDokumen) {
+            toast({
+                title: 'Dokumen revisi wajib diisi',
+                description: 'Isi link dokumen revisi atau unggah file revisi.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         setLoading(true);
         try {
             const dataToSend = new FormData();
-            Object.entries(formData).forEach(([key, val]) => {
-                if (val !== null && val !== undefined) dataToSend.append(key, String(val));
-            });
+            if (isRevision) {
+                appendRevisionFields(dataToSend);
+            } else {
+                appendBaseFields(dataToSend);
+            }
             if (fileDokumen) dataToSend.append('file_dokumen', fileDokumen);
 
             const result = await updateSakip(id, dataToSend);
             if (result.success) {
-                toast({ title: 'Sukses', description: 'Data berhasil diperbarui!' });
+                toast({
+                    title: 'Sukses',
+                    description: isRevision ? `Revisi ${nextRevision} berhasil ditambahkan!` : 'Data berhasil diperbarui!',
+                });
                 router.push('/sakip');
             } else {
                 toast({ variant: 'destructive', title: 'Gagal', description: result.message || 'Terjadi kesalahan.' });
@@ -90,12 +151,13 @@ export default function SakipEdit() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className='space-y-4'>
-                            <div className='grid grid-cols-2 gap-4'>
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 <div className='space-y-2'>
                                     <Label>Tahun <span className='text-red-500'>*</span></Label>
                                     <Select
                                         value={String(formData.tahun || '')}
                                         onValueChange={v => setFormData(prev => ({ ...prev, tahun: parseInt(v) }))}
+                                        disabled={isRevision}
                                     >
                                         <SelectTrigger>
                                             <SelectValue />
@@ -112,6 +174,7 @@ export default function SakipEdit() {
                                     <Select
                                         value={formData.jenis_dokumen || ''}
                                         onValueChange={v => setFormData(prev => ({ ...prev, jenis_dokumen: v as typeof JENIS_DOKUMEN_SAKIP[number] }))}
+                                        disabled={isRevision}
                                     >
                                         <SelectTrigger>
                                             <SelectValue />
@@ -131,11 +194,90 @@ export default function SakipEdit() {
                                     value={formData.uraian || ''}
                                     onChange={e => setFormData(prev => ({ ...prev, uraian: e.target.value }))}
                                     rows={4}
+                                    disabled={isRevision}
                                 />
                             </div>
 
+                            <div className='rounded-md border p-3'>
+                                <div className='flex items-start gap-3'>
+                                    <input
+                                        id='is_revisi'
+                                        type='checkbox'
+                                        checked={isRevision}
+                                        onChange={e => {
+                                            setIsRevision(e.target.checked);
+                                            setFileDokumen(null);
+                                        }}
+                                        className='mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600'
+                                    />
+                                    <div className='space-y-2'>
+                                        <Label htmlFor='is_revisi' className='font-medium'>Ini revisi dokumen</Label>
+                                        <div className='flex flex-wrap items-center gap-2'>
+                                            <Badge variant='outline'>Revisi {nextRevision}</Badge>
+                                            {formData.latest_revision && (
+                                                <Badge className='bg-indigo-600'>Terakhir Revisi {formData.latest_revision.revisi_ke}</Badge>
+                                            )}
+                                        </div>
+                                        {isRevision && !hasInitialDocument && (
+                                            <p className='text-xs text-red-600'>Belum ada dokumen awal.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {!isRevision ? (
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                    <div className='space-y-2'>
+                                        <Label>Link Dokumen</Label>
+                                        <Input
+                                            value={formData.link_dokumen || ''}
+                                            onChange={e => setFormData(prev => ({ ...prev, link_dokumen: e.target.value }))}
+                                            placeholder='https://drive.google.com/...'
+                                        />
+                                    </div>
+                                    <div className='space-y-2'>
+                                        <Label>Tanggal Publish</Label>
+                                        <Input
+                                            type='date'
+                                            value={formData.tanggal_publish || ''}
+                                            onChange={e => setFormData(prev => ({ ...prev, tanggal_publish: e.target.value }))}
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className='space-y-4'>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                        <div className='space-y-2'>
+                                            <Label>Link Dokumen Revisi</Label>
+                                            <Input
+                                                value={revisionData.link_dokumen}
+                                                onChange={e => setRevisionData(prev => ({ ...prev, link_dokumen: e.target.value }))}
+                                                placeholder='https://drive.google.com/...'
+                                            />
+                                        </div>
+                                        <div className='space-y-2'>
+                                            <Label>Tanggal Publish Revisi <span className='text-red-500'>*</span></Label>
+                                            <Input
+                                                type='date'
+                                                value={revisionData.tanggal_publish}
+                                                onChange={e => setRevisionData(prev => ({ ...prev, tanggal_publish: e.target.value }))}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className='space-y-2'>
+                                        <Label>Keterangan Revisi</Label>
+                                        <Textarea
+                                            value={revisionData.keterangan_revisi}
+                                            onChange={e => setRevisionData(prev => ({ ...prev, keterangan_revisi: e.target.value }))}
+                                            rows={3}
+                                            placeholder='Contoh: Perbaikan target kinerja atau penyesuaian lampiran.'
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
                             <div className='space-y-2'>
-                                <Label>Dokumen</Label>
+                                <Label>{isRevision ? 'File Dokumen Revisi' : 'File Dokumen'}</Label>
                                 {formData.link_dokumen && (
                                     <div className='mb-2'>
                                         <a
@@ -145,14 +287,12 @@ export default function SakipEdit() {
                                             className='inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline'
                                         >
                                             <ExternalLink className='h-3 w-3' />
-                                            Dokumen saat ini
+                                            Dokumen awal
                                         </a>
-                                        <span className='text-xs text-muted-foreground ml-2'>
-                                            (Unggah file baru untuk mengganti)
-                                        </span>
                                     </div>
                                 )}
                                 <Input
+                                    key={isRevision ? 'revision-file' : 'main-file'}
                                     type='file'
                                     onChange={e => setFileDokumen(e.target.files?.[0] || null)}
                                     accept='.pdf,.doc,.docx,.jpg,.jpeg,.png'
@@ -162,7 +302,7 @@ export default function SakipEdit() {
                                 </p>
                                 {fileDokumen && (
                                     <p className='text-xs text-indigo-600 font-medium'>
-                                        File baru dipilih: {fileDokumen.name}
+                                        File dipilih: {fileDokumen.name}
                                     </p>
                                 )}
                             </div>
@@ -171,7 +311,7 @@ export default function SakipEdit() {
                                 <Link href='/sakip'><Button type='button' variant='outline'>Batal</Button></Link>
                                 <Button type='submit' className='bg-indigo-600 hover:bg-indigo-700' disabled={loading}>
                                     {loading ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <Save className='mr-2 h-4 w-4' />}
-                                    Simpan Perubahan
+                                    {isRevision ? `Simpan Revisi ${nextRevision}` : 'Simpan Perubahan'}
                                 </Button>
                             </div>
                         </form>
