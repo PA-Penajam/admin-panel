@@ -46,7 +46,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 // ─────────────────────────────────────────────
 // Definisi grup navigasi
@@ -304,7 +304,6 @@ export function AppSidebar() {
                                     className="data-[state=open]:bg-slate-800 data-[state=open]:text-white hover:bg-slate-800 hover:text-white text-slate-300"
                                 >
                                     <Avatar className="h-8 w-8 rounded-lg shrink-0">
-                                        <AvatarImage src="/avatars/admin.png" alt="Admin" />
                                         <AvatarFallback className="rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold">
                                             AD
                                         </AvatarFallback>
