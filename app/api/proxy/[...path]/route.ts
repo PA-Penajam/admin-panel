@@ -1,4 +1,4 @@
-const BACKEND_API_URL = process.env.API_URL || 'http://localhost:8000/api';
+const BACKEND_API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const BACKEND_API_KEY = process.env.API_KEY || '';
 
 type ProxyContext = {
