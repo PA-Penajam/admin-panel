@@ -83,7 +83,7 @@ export default function SakipEdit() {
         if (isRevision && !hasInitialDocument) {
             toast({
                 title: 'Dokumen awal belum ada',
-                description: 'Simpan dokumen awal terlebih dahulu sebelum membuat revisi.',
+                description: 'Simpan dokumen awal terlebih dahulu sebelum membuat reviu.',
                 variant: 'destructive',
             });
             return;
@@ -96,8 +96,8 @@ export default function SakipEdit() {
 
         if (isRevision && !revisionData.link_dokumen.trim() && !fileDokumen) {
             toast({
-                title: 'Dokumen revisi wajib diisi',
-                description: 'Isi link dokumen revisi atau unggah file revisi.',
+                title: 'Dokumen reviu wajib diisi',
+                description: 'Isi link dokumen reviu atau unggah file reviu.',
                 variant: 'destructive',
             });
             return;
@@ -117,7 +117,7 @@ export default function SakipEdit() {
             if (result.success) {
                 toast({
                     title: 'Sukses',
-                    description: isRevision ? `Revisi ${nextRevision} berhasil ditambahkan!` : 'Data berhasil diperbarui!',
+                    description: isRevision ? `Reviu ${nextRevision} berhasil ditambahkan!` : 'Data berhasil diperbarui!',
                 });
                 router.push('/sakip');
             } else {
@@ -211,11 +211,11 @@ export default function SakipEdit() {
                                         className='mt-1 h-4 w-4 rounded border-gray-300 text-indigo-600'
                                     />
                                     <div className='space-y-2'>
-                                        <Label htmlFor='is_revisi' className='font-medium'>Ini revisi dokumen</Label>
+                                        <Label htmlFor='is_revisi' className='font-medium'>Ini reviu dokumen</Label>
                                         <div className='flex flex-wrap items-center gap-2'>
-                                            <Badge variant='outline'>Revisi {nextRevision}</Badge>
+                                            <Badge variant='outline'>Reviu {nextRevision}</Badge>
                                             {formData.latest_revision && (
-                                                <Badge className='bg-indigo-600'>Terakhir Revisi {formData.latest_revision.revisi_ke}</Badge>
+                                                <Badge className='bg-indigo-600'>Terakhir Reviu {formData.latest_revision.revisi_ke}</Badge>
                                             )}
                                         </div>
                                         {isRevision && !hasInitialDocument && (
@@ -248,7 +248,7 @@ export default function SakipEdit() {
                                 <div className='space-y-4'>
                                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                         <div className='space-y-2'>
-                                            <Label>Link Dokumen Revisi</Label>
+                                            <Label>Link Dokumen Reviu</Label>
                                             <Input
                                                 value={revisionData.link_dokumen}
                                                 onChange={e => setRevisionData(prev => ({ ...prev, link_dokumen: e.target.value }))}
@@ -256,7 +256,7 @@ export default function SakipEdit() {
                                             />
                                         </div>
                                         <div className='space-y-2'>
-                                            <Label>Tanggal Publish Revisi <span className='text-red-500'>*</span></Label>
+                                            <Label>Tanggal Publish Reviu <span className='text-red-500'>*</span></Label>
                                             <Input
                                                 type='date'
                                                 value={revisionData.tanggal_publish}
@@ -265,7 +265,7 @@ export default function SakipEdit() {
                                         </div>
                                     </div>
                                     <div className='space-y-2'>
-                                        <Label>Keterangan Revisi</Label>
+                                        <Label>Keterangan Reviu</Label>
                                         <Textarea
                                             value={revisionData.keterangan_revisi}
                                             onChange={e => setRevisionData(prev => ({ ...prev, keterangan_revisi: e.target.value }))}
@@ -277,7 +277,7 @@ export default function SakipEdit() {
                             )}
 
                             <div className='space-y-2'>
-                                <Label>{isRevision ? 'File Dokumen Revisi' : 'File Dokumen'}</Label>
+                                <Label>{isRevision ? 'File Dokumen Reviu' : 'File Dokumen'}</Label>
                                 {formData.link_dokumen && (
                                     <div className='mb-2'>
                                         <a
@@ -311,7 +311,7 @@ export default function SakipEdit() {
                                 <Link href='/sakip'><Button type='button' variant='outline'>Batal</Button></Link>
                                 <Button type='submit' className='bg-indigo-600 hover:bg-indigo-700' disabled={loading}>
                                     {loading ? <Loader2 className='mr-2 h-4 w-4 animate-spin' /> : <Save className='mr-2 h-4 w-4' />}
-                                    {isRevision ? `Simpan Revisi ${nextRevision}` : 'Simpan Perubahan'}
+                                    {isRevision ? `Simpan Reviu ${nextRevision}` : 'Simpan Perubahan'}
                                 </Button>
                             </div>
                         </form>

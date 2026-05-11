@@ -162,7 +162,7 @@ export default function SakipList() {
     );
 
     const getActiveLabel = (item: Sakip) => (
-        item.latest_revision ? `Revisi ${item.latest_revision.revisi_ke}` : 'Dokumen Awal'
+        item.latest_revision ? `Reviu ${item.latest_revision.revisi_ke}` : 'Dokumen Awal'
     );
 
     return (
@@ -294,7 +294,7 @@ export default function SakipList() {
                                                             size="icon"
                                                             className="h-8 w-8 hover:text-indigo-600"
                                                             onClick={() => setSelectedHistory(item)}
-                                                            title="History revisi"
+                                                            title="History reviu"
                                                         >
                                                             <History className="h-4 w-4" />
                                                         </Button>
@@ -367,7 +367,7 @@ export default function SakipList() {
             <Dialog open={!!selectedHistory} onOpenChange={open => !open && setSelectedHistory(null)}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>History Dokumen SAKIP</DialogTitle>
+                        <DialogTitle>History Reviu Dokumen SAKIP</DialogTitle>
                         <DialogDescription>
                             {selectedHistory?.jenis_dokumen} Tahun {selectedHistory?.tahun}
                         </DialogDescription>
@@ -403,7 +403,7 @@ export default function SakipList() {
                                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                                             <div className="space-y-2">
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                    <Badge className="bg-indigo-600">Revisi {revision.revisi_ke}</Badge>
+                                                    <Badge className="bg-indigo-600">Reviu {revision.revisi_ke}</Badge>
                                                     <span className="text-xs text-muted-foreground">
                                                         Publish: {formatDate(revision.tanggal_publish)}
                                                     </span>
@@ -429,7 +429,7 @@ export default function SakipList() {
                                 ))
                             ) : (
                                 <div className="rounded-md border border-dashed p-4 text-center text-sm text-muted-foreground">
-                                    Belum ada history revisi.
+                                    Belum ada history reviu.
                                 </div>
                             )}
                         </div>
