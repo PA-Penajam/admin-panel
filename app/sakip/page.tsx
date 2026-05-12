@@ -1,9 +1,17 @@
 'use client';
 
 import { MagicDeleteDialog } from '@/components/custom/magic-delete-dialog';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type FormEvent } from 'react';
 import Link from 'next/link';
-import { getAllSakip, deleteSakip, JENIS_DOKUMEN_SAKIP, type Sakip } from '@/lib/api';
+import {
+    getAllSakip,
+    deleteSakip,
+    updateSakipRevision,
+    deleteSakipRevision,
+    JENIS_DOKUMEN_SAKIP,
+    type Sakip,
+    type SakipRevision,
+} from '@/lib/api';
 import { getYearOptions } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -15,19 +23,31 @@ import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import {
-    Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
 } from '@/components/ui/dialog';
 
 import {
     Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis
 } from '@/components/ui/pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, RefreshCw, Trash2, Edit, ExternalLink, Search, History } from 'lucide-react';
+import { PlusCircle, RefreshCw, Trash2, Edit, ExternalLink, Search, History, Loader2 } from 'lucide-react';
 import { BlurFade } from '@/components/ui/blur-fade';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const PAGE_SIZE = 15;
+const EMPTY_REVISION_FORM = {
+    tanggal_publish: '',
+    link_dokumen: '',
+    keterangan_revisi: '',
+};
+
+type RevisionTarget = {
+    sakip: Sakip;
+    revision: SakipRevision;
+};
 
 export default function SakipList() {
     const [allData, setAllData] = useState<Sakip[]>([]);
@@ -38,6 +58,11 @@ export default function SakipList() {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [selectedHistory, setSelectedHistory] = useState<Sakip | null>(null);
+    const [revisionEditTarget, setRevisionEditTarget] = useState<RevisionTarget | null>(null);
+    const [revisionDeleteTarget, setRevisionDeleteTarget] = useState<RevisionTarget | null>(null);
+    const [revisionForm, setRevisionForm] = useState(EMPTY_REVISION_FORM);
+    const [revisionFile, setRevisionFile] = useState<File | null>(null);
+    const [savingRevision, setSavingRevision] = useState(false);
     const { toast } = useToast();
 
     const [pagination, setPagination] = useState({
@@ -113,6 +138,85 @@ export default function SakipList() {
         }
         setDeleteId(null);
         loadData();
+    };
+
+    const syncUpdatedSakip = (updated: Sakip) => {
+        setAllData(prev => prev.map(item => item.id === updated.id ? updated : item));
+        setSelectedHistory(prev => prev?.id === updated.id ? updated : prev);
+    };
+
+    const openRevisionEdit = (sakip: Sakip, revision: SakipRevision) => {
+        setRevisionEditTarget({ sakip, revision });
+        setRevisionForm({
+            tanggal_publish: revision.tanggal_publish || '',
+            link_dokumen: revision.link_dokumen || '',
+            keterangan_revisi: revision.keterangan || '',
+        });
+        setRevisionFile(null);
+    };
+
+    const closeRevisionEdit = () => {
+        if (savingRevision) return;
+        setRevisionEditTarget(null);
+        setRevisionForm(EMPTY_REVISION_FORM);
+        setRevisionFile(null);
+    };
+
+    const handleRevisionUpdate = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        if (!revisionEditTarget?.sakip.id || !revisionEditTarget.revision.id) return;
+
+        if (!revisionForm.tanggal_publish) {
+            toast({ variant: 'destructive', title: 'Gagal', description: 'Tanggal publish reviu wajib diisi.' });
+            return;
+        }
+
+        if (!revisionForm.link_dokumen.trim() && !revisionFile) {
+            toast({ variant: 'destructive', title: 'Gagal', description: 'Dokumen reviu wajib diisi melalui link atau file.' });
+            return;
+        }
+
+        setSavingRevision(true);
+        const payload = new FormData();
+        payload.append('tanggal_publish', revisionForm.tanggal_publish);
+        payload.append('link_dokumen', revisionForm.link_dokumen.trim());
+        payload.append('keterangan_revisi', revisionForm.keterangan_revisi.trim());
+        if (revisionFile) payload.append('file_dokumen', revisionFile);
+
+        try {
+            const result = await updateSakipRevision(revisionEditTarget.sakip.id, revisionEditTarget.revision.id, payload);
+            if (result.success && result.data) {
+                syncUpdatedSakip(result.data);
+                toast({ title: 'Sukses', description: 'Reviu berhasil diperbarui!' });
+                setRevisionEditTarget(null);
+                setRevisionForm(EMPTY_REVISION_FORM);
+                setRevisionFile(null);
+            } else {
+                toast({ variant: 'destructive', title: 'Gagal', description: result.message || 'Reviu gagal diperbarui.' });
+            }
+        } catch {
+            toast({ variant: 'destructive', title: 'Gagal', description: 'Terjadi kesalahan saat memperbarui reviu.' });
+        } finally {
+            setSavingRevision(false);
+        }
+    };
+
+    const handleRevisionDelete = async () => {
+        if (!revisionDeleteTarget?.sakip.id || !revisionDeleteTarget.revision.id) return;
+
+        try {
+            const result = await deleteSakipRevision(revisionDeleteTarget.sakip.id, revisionDeleteTarget.revision.id);
+            if (result.success && result.data) {
+                syncUpdatedSakip(result.data);
+                toast({ title: 'Sukses', description: 'Reviu berhasil dihapus!' });
+            } else {
+                toast({ variant: 'destructive', title: 'Gagal', description: result.message || 'Reviu gagal dihapus.' });
+            }
+        } catch {
+            toast({ variant: 'destructive', title: 'Gagal', description: 'Terjadi kesalahan saat menghapus reviu.' });
+        } finally {
+            setRevisionDeleteTarget(null);
+        }
     };
 
     const renderPaginationItems = () => {
@@ -413,16 +517,54 @@ export default function SakipList() {
                                                 )}
                                             </div>
                                             {revision.link_dokumen ? (
-                                                <a
-                                                    href={revision.link_dokumen}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center justify-center gap-1 rounded-md border px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50"
-                                                >
-                                                    <ExternalLink className="h-3 w-3" /> Buka Dokumen
-                                                </a>
+                                                <div className="flex flex-wrap justify-end gap-2">
+                                                    <a
+                                                        href={revision.link_dokumen}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center justify-center gap-1 rounded-md border px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50"
+                                                    >
+                                                        <ExternalLink className="h-3 w-3" /> Buka Dokumen
+                                                    </a>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openRevisionEdit(selectedHistory, revision)}
+                                                    >
+                                                        <Edit className="mr-1 h-3 w-3" /> Edit
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                                        onClick={() => setRevisionDeleteTarget({ sakip: selectedHistory, revision })}
+                                                    >
+                                                        <Trash2 className="mr-1 h-3 w-3" /> Hapus
+                                                    </Button>
+                                                </div>
                                             ) : (
-                                                <span className="text-xs italic text-muted-foreground">Belum tersedia</span>
+                                                <div className="flex flex-wrap justify-end gap-2">
+                                                    <span className="text-xs italic text-muted-foreground">Belum tersedia</span>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openRevisionEdit(selectedHistory, revision)}
+                                                    >
+                                                        <Edit className="mr-1 h-3 w-3" /> Edit
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                                                        onClick={() => setRevisionDeleteTarget({ sakip: selectedHistory, revision })}
+                                                    >
+                                                        <Trash2 className="mr-1 h-3 w-3" /> Hapus
+                                                    </Button>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -436,6 +578,80 @@ export default function SakipList() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            <Dialog open={!!revisionEditTarget} onOpenChange={open => !open && closeRevisionEdit()}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Edit Reviu {revisionEditTarget?.revision.revisi_ke}</DialogTitle>
+                        <DialogDescription>
+                            {revisionEditTarget?.sakip.jenis_dokumen} Tahun {revisionEditTarget?.sakip.tahun}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleRevisionUpdate} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="revision-link">Link Dokumen Reviu</Label>
+                            <Input
+                                id="revision-link"
+                                value={revisionForm.link_dokumen}
+                                onChange={event => setRevisionForm(prev => ({ ...prev, link_dokumen: event.target.value }))}
+                                placeholder="https://drive.google.com/..."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="revision-date">Tanggal Publish Reviu <span className="text-red-500">*</span></Label>
+                            <Input
+                                id="revision-date"
+                                type="date"
+                                value={revisionForm.tanggal_publish}
+                                onChange={event => setRevisionForm(prev => ({ ...prev, tanggal_publish: event.target.value }))}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="revision-note">Keterangan Reviu</Label>
+                            <Textarea
+                                id="revision-note"
+                                rows={3}
+                                value={revisionForm.keterangan_revisi}
+                                onChange={event => setRevisionForm(prev => ({ ...prev, keterangan_revisi: event.target.value }))}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="revision-file">Ganti File Dokumen Reviu</Label>
+                            <Input
+                                id="revision-file"
+                                type="file"
+                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                onChange={event => setRevisionFile(event.target.files?.[0] || null)}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Kosongkan jika tetap memakai link/file lama.
+                            </p>
+                            {revisionFile && (
+                                <p className="text-xs font-medium text-indigo-600">
+                                    File dipilih: {revisionFile.name}
+                                </p>
+                            )}
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={closeRevisionEdit} disabled={savingRevision}>
+                                Batal
+                            </Button>
+                            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700" disabled={savingRevision}>
+                                {savingRevision ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Edit className="mr-2 h-4 w-4" />}
+                                Simpan Reviu
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            <MagicDeleteDialog
+                isOpen={!!revisionDeleteTarget}
+                onClose={() => setRevisionDeleteTarget(null)}
+                onConfirm={handleRevisionDelete}
+                title="Hapus Reviu"
+                description={`Hapus Reviu ${revisionDeleteTarget?.revision.revisi_ke || ''}? Dokumen awal tidak ikut terhapus.`}
+            />
         </div>
     );
 }

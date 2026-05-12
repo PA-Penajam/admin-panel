@@ -797,6 +797,39 @@ export async function updateSakip(id: number, data: FormData | Partial<Sakip>): 
   return normalizeApiResponse<Sakip>(response);
 }
 
+export async function updateSakipRevision(sakipId: number, revisionId: number, data: FormData): Promise<ApiResponse<Sakip>> {
+  data.append('_method', 'PUT');
+  const response = await fetch(`${API_URL}/sakip/${sakipId}/reviu/${revisionId}`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: data,
+  });
+
+  if (!response.ok) {
+    let msg = `HTTP ${response.status}`;
+    try {
+      const err = await response.json();
+      if (err?.errors && typeof err.errors === 'object') {
+        const firstField = Object.keys(err.errors)[0];
+        msg = err.errors[firstField]?.[0] || err?.message || msg;
+      } else {
+        msg = err?.message || msg;
+      }
+    } catch { /* body kosong atau non-JSON */ }
+    return { success: false, message: msg };
+  }
+
+  return normalizeApiResponse<Sakip>(response);
+}
+
+export async function deleteSakipRevision(sakipId: number, revisionId: number): Promise<ApiResponse<Sakip>> {
+  const response = await fetch(`${API_URL}/sakip/${sakipId}/reviu/${revisionId}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  return normalizeApiResponse<Sakip>(response);
+}
+
 export async function deleteSakip(id: number): Promise<ApiResponse<null>> {
   const response = await fetch(`${API_URL}/sakip/${id}`, {
     method: 'DELETE',
