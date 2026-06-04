@@ -153,7 +153,8 @@ export default function TambahLaporanKeuangan() {
                                 <SelectContent>
                                     <SelectItem value="semester_1">Semester 1</SelectItem>
                                     <SelectItem value="semester_2">Semester 2</SelectItem>
-                                    <SelectItem value="tahunan">Tahunan</SelectItem>
+                                    <SelectItem value="unaudited">Unaudited</SelectItem>
+                                    <SelectItem value="audited">Audited</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

@@ -122,7 +122,8 @@ export default function LaporanKeuanganList() {
         const labels: Record<string, string> = {
             'semester_1': 'Semester 1',
             'semester_2': 'Semester 2',
-            'tahunan': 'Tahunan',
+            'unaudited': 'Unaudited',
+            'audited': 'Audited',
         };
         return labels[periode] || periode;
     };
