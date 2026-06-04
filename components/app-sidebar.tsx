@@ -142,6 +142,13 @@ const navGroups = [
                 color: 'text-indigo-400',
                 activeColor: 'border-indigo-400',
             },
+            {
+                label: 'Laporan Keuangan',
+                icon: Receipt,
+                href: '/laporan-keuangan',
+                color: 'text-purple-400',
+                activeColor: 'border-purple-400',
+            },
         ],
     },
     {
