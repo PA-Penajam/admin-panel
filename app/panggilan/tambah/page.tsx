@@ -31,9 +31,11 @@ export default function TambahPanggilan() {
     tanggal_sidang: '',
     pip: '',
     link_surat: '',
+    link_pbt: '',
     keterangan: ''
   });
   const [file, setFile] = useState<File | null>(null);
+  const [pbtFile, setPbtFile] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -47,6 +49,12 @@ export default function TambahPanggilan() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handlePbtFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPbtFile(e.target.files[0]);
     }
   };
 
@@ -69,6 +77,10 @@ export default function TambahPanggilan() {
 
       if (file) {
         dataToSend.append('file_upload', file);
+      }
+
+      if (pbtFile) {
+        dataToSend.append('file_upload_pbt', pbtFile);
       }
 
       const result = await createPanggilan(dataToSend);
@@ -237,6 +249,20 @@ export default function TambahPanggilan() {
                     id="file_upload"
                     type="file"
                     onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    className="cursor-pointer"
+                  />
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-xs text-muted-foreground">Format: PDF, DOC, JPG. Max 5MB.</p>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="file_upload_pbt">Upload PBT (Pemberitahuan Isi Putusan)</Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="file_upload_pbt"
+                    type="file"
+                    onChange={handlePbtFileChange}
                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                     className="cursor-pointer"
                   />

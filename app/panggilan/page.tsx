@@ -184,6 +184,7 @@ export default function PanggilanList() {
                     <TableHead className="hidden md:table-cell">Alamat Asal</TableHead>
                     <TableHead>Panggilan I</TableHead>
                     <TableHead>Sidang</TableHead>
+                    <TableHead className="text-center">Dokumen</TableHead>
                     <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -197,12 +198,13 @@ export default function PanggilanList() {
                         <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-48" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-16 mx-auto" /></TableCell>
                         <TableCell><Skeleton className="h-8 w-20 float-right" /></TableCell>
                       </TableRow>
                     ))
                   ) : data.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
+                      <TableCell colSpan={8} className="h-24 text-center">
                         Tidak ada data ditemukan.
                       </TableCell>
                     </TableRow>
@@ -219,6 +221,36 @@ export default function PanggilanList() {
                         </TableCell>
                         <TableCell>{formatDate(item.panggilan_1)}</TableCell>
                         <TableCell>{formatDate(item.tanggal_sidang)}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center justify-center gap-3">
+                            {item.link_surat ? (
+                              <a
+                                href={item.link_surat}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Lihat Surat Panggilan"
+                                className="text-blue-600 hover:underline inline-flex items-center gap-1 text-xs"
+                              >
+                                <FileText className="h-4 w-4" /> Surat
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">Surat -</span>
+                            )}
+                            {item.link_pbt ? (
+                              <a
+                                href={item.link_pbt}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Lihat PBT (Pemberitahuan Isi Putusan)"
+                                className="text-emerald-600 hover:underline inline-flex items-center gap-1 text-xs"
+                              >
+                                <FileText className="h-4 w-4" /> PBT
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">PBT -</span>
+                            )}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Link href={`/panggilan/${item.id}/edit`}>

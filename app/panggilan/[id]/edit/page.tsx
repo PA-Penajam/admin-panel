@@ -36,10 +36,12 @@ export default function EditPanggilan() {
     tanggal_sidang: '',
     pip: '',
     link_surat: '',
+    link_pbt: '',
     keterangan: ''
   });
 
   const [file, setFile] = useState<File | null>(null);
+  const [pbtFile, setPbtFile] = useState<File | null>(null);
 
   // Load existing data
   useEffect(() => {
@@ -90,6 +92,12 @@ export default function EditPanggilan() {
     }
   };
 
+  const handlePbtFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPbtFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -109,6 +117,10 @@ export default function EditPanggilan() {
 
       if (file) {
         dataToSend.append('file_upload', file);
+      }
+
+      if (pbtFile) {
+        dataToSend.append('file_upload_pbt', pbtFile);
       }
 
       const result = await updatePanggilan(id, dataToSend);
@@ -300,6 +312,34 @@ export default function EditPanggilan() {
                     id="file_upload"
                     type="file"
                     onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    className="cursor-pointer"
+                  />
+                  <Upload className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-xs text-muted-foreground">Upload file baru untuk mengganti. Max 5MB.</p>
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="file_upload_pbt">Upload PBT (Pemberitahuan Isi Putusan)</Label>
+
+                {formData.link_pbt && (
+                  <div className="mb-2">
+                    <a
+                      href={formData.link_pbt}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <FileText className="h-4 w-4" /> Lihat File PBT Saat Ini <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="file_upload_pbt"
+                    type="file"
+                    onChange={handlePbtFileChange}
                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                     className="cursor-pointer"
                   />

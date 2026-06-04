@@ -13,6 +13,7 @@ export interface Panggilan {
   tanggal_sidang?: string;
   pip?: string;
   link_surat?: string;
+  link_pbt?: string;
   keterangan?: string;
   created_at?: string;
   updated_at?: string;
@@ -246,6 +247,7 @@ export interface PanggilanEcourt {
   tanggal_sidang?: string;
   pip?: string;
   link_surat?: string;
+  link_pbt?: string;
   keterangan?: string;
   created_at?: string;
   updated_at?: string;
