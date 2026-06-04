@@ -130,8 +130,8 @@ export default function LaporanKeuanganList() {
 
     const getSatkerLabel = (satker: string) => {
         const labels: Record<string, string> = {
-            '401877': 'SATKER 401877',
-            '401983': 'SATKER 401983',
+            '401877': '401877',
+            '401983': '401983',
         };
         return labels[satker] || satker;
     };

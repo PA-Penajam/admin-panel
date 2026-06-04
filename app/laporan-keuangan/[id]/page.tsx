@@ -197,8 +197,8 @@ export default function EditLaporanKeuangan() {
                                     <SelectValue placeholder="Pilih Satker" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="401877">SATKER 401877</SelectItem>
-                                    <SelectItem value="401983">SATKER 401983</SelectItem>
+                                    <SelectItem value="401877">401877</SelectItem>
+                                    <SelectItem value="401983">401983</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -227,7 +227,7 @@ export default function EditLaporanKeuangan() {
                                 id="judul"
                                 name="judul"
                                 type="text"
-                                placeholder="Contoh: Laporan Keuangan SATKER 401877 Semester 1 Tahun 2024"
+                                placeholder="Contoh: Laporan Keuangan 401877 Semester 1 Tahun 2024"
                                 value={formData.judul}
                                 onChange={handleChange}
                                 required
