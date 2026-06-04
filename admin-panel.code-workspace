@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../joomla-orig"
+		},
+		{
+			"path": "../api-web"
+		}
+	],
+	"settings": {}
+}

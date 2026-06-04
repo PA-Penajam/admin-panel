@@ -1225,6 +1225,76 @@ export async function deleteLra(id: number): Promise<ApiResponse<null>> {
   return response.json();
 }
 
+// ==========================================
+// API LAPORAN KEUANGAN
+// ==========================================
+
+export interface LaporanKeuangan {
+  id?: number;
+  tahun: number;
+  jenis_satker: string;
+  periode: string;
+  judul: string;
+  file_url?: string;
+  cover_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// GET - Ambil semua data Laporan Keuangan
+export async function getAllLaporanKeuangan(tahun?: number, page = 1): Promise<ApiResponse<LaporanKeuangan[]>> {
+  const qs: string[] = [];
+  if (tahun) qs.push(`tahun=${encodeURIComponent(String(tahun))}`);
+  qs.push(`page=${page}`);
+  const url = `${API_URL}/laporan-keuangan?${qs.join('&')}`;
+  const response = await fetch(url, { cache: 'no-store' });
+  return response.json();
+}
+
+// GET - Ambil satu data Laporan Keuangan
+export async function getLaporanKeuangan(id: number): Promise<LaporanKeuangan | null> {
+  const response = await fetch(`${API_URL}/laporan-keuangan/${id}`);
+  const result: ApiResponse<LaporanKeuangan> = await response.json();
+  return result.data || null;
+}
+
+// POST - Tambah data Laporan Keuangan baru
+export async function createLaporanKeuangan(data: LaporanKeuangan | FormData): Promise<ApiResponse<LaporanKeuangan>> {
+  const isFormData = data instanceof FormData;
+  const response = await fetch(`${API_URL}/laporan-keuangan`, {
+    method: 'POST',
+    headers: getHeaders(isFormData),
+    body: isFormData ? data : JSON.stringify(data),
+  });
+  return response.json();
+}
+
+// PUT - Update data Laporan Keuangan
+export async function updateLaporanKeuangan(id: number, data: LaporanKeuangan | FormData): Promise<ApiResponse<LaporanKeuangan>> {
+  const isFormData = data instanceof FormData;
+
+  const method = isFormData ? 'POST' : 'PUT';
+  if (isFormData) {
+    (data as FormData).append('_method', 'PUT');
+  }
+
+  const response = await fetch(`${API_URL}/laporan-keuangan/${id}`, {
+    method: method,
+    headers: getHeaders(isFormData),
+    body: isFormData ? data : JSON.stringify(data),
+  });
+  return response.json();
+}
+
+// DELETE - Hapus data Laporan Keuangan
+export async function deleteLaporanKeuangan(id: number): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_URL}/laporan-keuangan/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  return response.json();
+}
+
 
 // ==========================================
 // API MEDIASI
