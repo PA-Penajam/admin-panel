@@ -298,8 +298,8 @@ export default function LaporanKeuanganList() {
             </BlurFade>
 
             <MagicDeleteDialog
-                open={deleteId !== null}
-                onOpenChange={(open) => !open && setDeleteId(null)}
+                isOpen={deleteId !== null}
+                onClose={() => setDeleteId(null)}
                 onConfirm={handleDelete}
                 title="Hapus Laporan Keuangan"
                 description="Data yang dihapus tidak dapat dikembalikan. Lanjutkan?"
