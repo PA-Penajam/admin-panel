@@ -34,7 +34,8 @@ export default function PanggilanList() {
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
-    total: 0
+    total: 0,
+    per_page: 500
   });
 
   // Load data
@@ -48,7 +49,8 @@ export default function PanggilanList() {
         setPagination({
           current_page: result.current_page || 1,
           last_page: result.last_page || 1,
-          total: result.total || 0
+          total: result.total || 0,
+          per_page: result.per_page || 500
         });
       } else {
         setData([]);
@@ -212,7 +214,7 @@ export default function PanggilanList() {
                     data.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell className="text-center">
-                          {(pagination.current_page - 1) * 10 + index + 1}
+                          {(pagination.current_page - 1) * pagination.per_page + index + 1}
                         </TableCell>
                         <TableCell className="font-medium">{item.nomor_perkara}</TableCell>
                         <TableCell>{item.nama_dipanggil}</TableCell>
