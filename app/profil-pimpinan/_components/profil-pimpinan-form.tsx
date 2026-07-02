@@ -123,10 +123,10 @@ export function ProfilPimpinanForm({ mode, initialData }: ProfilPimpinanFormProp
     payload.append('tmt_jabatan', String(formData.tmt_jabatan ?? ''));
     payload.append('foto_url', String(formData.foto_url ?? ''));
     payload.append('profil_link', String(formData.profil_link ?? ''));
-    payload.append('status_aktif', String(Boolean(formData.status_aktif)));
+    payload.append('status_aktif', formData.status_aktif ? '1' : '0');
     payload.append('status_label', String(formData.status_label ?? ''));
     payload.append('urutan', String(formData.urutan ?? 0));
-    payload.append('published', String(Boolean(formData.published)));
+    payload.append('published', formData.published ? '1' : '0');
 
     if (fotoFile) {
       payload.append('foto_file', fotoFile);
