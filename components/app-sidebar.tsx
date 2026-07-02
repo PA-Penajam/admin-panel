@@ -202,6 +202,13 @@ const navGroups = [
         label: 'Profil & Inovasi',
         items: [
             {
+                label: 'Profil Pimpinan',
+                icon: User2,
+                href: '/profil-pimpinan',
+                color: 'text-cyan-400',
+                activeColor: 'border-cyan-400',
+            },
+            {
                 label: 'Uraian Tugas',
                 icon: Users,
                 href: '/uraian-tugas',
