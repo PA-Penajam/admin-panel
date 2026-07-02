@@ -40,6 +40,46 @@ export interface AgendaPimpinan {
   updated_at?: string;
 }
 
+export interface ProfilPimpinanRow {
+  jenjang?: string;
+  institusi?: string;
+  tahun?: string;
+  jabatan?: string;
+  instansi?: string;
+  nama?: string;
+}
+
+export interface ProfilPimpinan {
+  id?: number;
+  slug: string;
+  nama: string;
+  jabatan: string;
+  golongan_pangkat?: string | null;
+  tmt_jabatan?: string | null;
+  foto_url?: string | null;
+  profil_link?: string | null;
+  status_aktif: boolean;
+  status_label?: string | null;
+  urutan: number;
+  published: boolean;
+  riwayat_pendidikan?: Array<{
+    jenjang: string;
+    institusi: string;
+    tahun: string;
+  }>;
+  riwayat_pekerjaan?: Array<{
+    jabatan: string;
+    instansi: string;
+    tahun: string;
+  }>;
+  penghargaan?: Array<{
+    nama: string;
+    tahun: string;
+  }>;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Inovasi {
   id: number;
   nama_inovasi: string;
@@ -1390,6 +1430,52 @@ export async function updateMediatorBanner(id: number, data: FormData): Promise<
 
 export async function deleteMediatorBanner(id: number): Promise<ApiResponse<null>> {
   const response = await fetch(`${API_URL}/mediator-banners/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  return normalizeApiResponse<null>(response);
+}
+
+// ==========================================
+// API PROFIL PIMPINAN
+// ==========================================
+
+export async function getAllProfilPimpinan(params?: { q?: string; published?: boolean }): Promise<ApiResponse<ProfilPimpinan[]>> {
+  const qs: string[] = [];
+  if (params?.q) qs.push(`q=${encodeURIComponent(params.q)}`);
+  if (typeof params?.published === 'boolean') qs.push(`published=${params.published ? '1' : '0'}`);
+  const url = qs.length ? `${API_URL}/profil-pimpinan?${qs.join('&')}` : `${API_URL}/profil-pimpinan`;
+  const response = await fetch(url, { cache: 'no-store' });
+  return normalizeApiResponse<ProfilPimpinan[]>(response);
+}
+
+export async function getProfilPimpinan(idOrSlug: number | string): Promise<ProfilPimpinan | null> {
+  const response = await fetch(`${API_URL}/profil-pimpinan/${idOrSlug}`, { cache: 'no-store' });
+  const result = await normalizeApiResponse<ProfilPimpinan>(response);
+  return result.data || null;
+}
+
+export async function createProfilPimpinan(data: FormData): Promise<ApiResponse<ProfilPimpinan>> {
+  const response = await fetch(`${API_URL}/profil-pimpinan`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: data,
+  });
+  return normalizeApiResponse<ProfilPimpinan>(response);
+}
+
+export async function updateProfilPimpinan(id: number, data: FormData): Promise<ApiResponse<ProfilPimpinan>> {
+  data.append('_method', 'PUT');
+  const response = await fetch(`${API_URL}/profil-pimpinan/${id}`, {
+    method: 'POST',
+    headers: getHeaders(true),
+    body: data,
+  });
+  return normalizeApiResponse<ProfilPimpinan>(response);
+}
+
+export async function deleteProfilPimpinan(id: number): Promise<ApiResponse<null>> {
+  const response = await fetch(`${API_URL}/profil-pimpinan/${id}`, {
     method: 'DELETE',
     headers: getHeaders(),
   });
