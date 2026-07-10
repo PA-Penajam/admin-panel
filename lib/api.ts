@@ -688,7 +688,7 @@ export async function createAsetBmn(data: FormData | AsetBmn): Promise<ApiRespon
   const isFormData = data instanceof FormData;
   const method = isFormData ? 'POST' : 'POST';
   const body = isFormData ? data : JSON.stringify(data);
-  const headers = isFormData ? getHeaders() : { ...getHeaders(), 'Content-Type': 'application/json' };
+  const headers = getHeaders(isFormData);
 
   const response = await fetch(`${API_URL}/aset-bmn`, {
     method,
@@ -702,7 +702,7 @@ export async function updateAsetBmn(id: number, data: FormData | Partial<AsetBmn
   const isFormData = data instanceof FormData;
   const method = isFormData ? 'POST' : 'PUT';
   const body = isFormData ? (() => { data.append('_method', 'PUT'); return data; })() : JSON.stringify(data);
-  const headers = isFormData ? getHeaders() : { ...getHeaders(), 'Content-Type': 'application/json' };
+  const headers = getHeaders(isFormData);
 
   const response = await fetch(`${API_URL}/aset-bmn/${id}`, {
     method,
